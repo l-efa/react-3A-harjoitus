@@ -40,7 +40,7 @@ app.get("/api/notes/:id", (request, response) => {
   }
 });
 
-app.put("api/notes/:id", (request, response) => {
+app.put("/api/notes/:id", (request, response) => {
   const id = request.params.id;
   const obj = request.body;
   console.log(obj);
