@@ -44,6 +44,7 @@ app.put("api/notes/:id", (request, response) => {
   const id = request.params.id;
   const obj = request.body;
   console.log(obj);
+  response.send(obj);
 });
 
 app.delete("/api/notes/:id", (request, response) => {
