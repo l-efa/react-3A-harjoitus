@@ -1,4 +1,4 @@
-import express from "express";
+import express, { response } from "express";
 const app = express();
 
 app.use(express.json());
@@ -38,6 +38,12 @@ app.get("/api/notes/:id", (request, response) => {
   } else {
     response.status(404).end();
   }
+});
+
+app.put("api/notes/:id", (request, response) => {
+  const id = request.params.id;
+  const obj = request.body;
+  console.log(obj);
 });
 
 app.delete("/api/notes/:id", (request, response) => {
