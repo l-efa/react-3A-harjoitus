@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "lint": "eslint .",
-    "preview": "vite preview",
+    "build": "echo 'No build process required for this app'",
     "start": "node index.js",
     "dev": "node --watch index.js"
   },
