@@ -1,9 +1,13 @@
+import dotenv, { parse } from "dotenv";
+dotenv.config();
 import express, { response } from "express";
-const app = express();
+import Note from "./src/models/note.js";
 
+const app = express();
 app.use(express.json());
 app.use(express.static("dist"));
-
+const PORT = process.env.PORT;
+/*
 let notes = [
   {
     id: "1",
@@ -20,30 +24,33 @@ let notes = [
     content: "GET and POST are the most important methods of HTTP protocol",
     important: true,
   },
-];
+];*/
 
 app.get("/", (request, response) => {
   response.send("<h1>Hello World!</h1>");
 });
 
 app.get("/api/notes", (request, response) => {
-  response.json(notes);
+  Note.find({}).then((notes) => {
+    response.json(notes);
+  });
 });
 
 app.get("/api/notes/:id", (request, response) => {
   const id = request.params.id;
-  const note = notes.find((note) => note.id === id);
-  if (note) {
+  let intId = parseInt(id);
+  Note.find({ id: intId }).then((note) => {
     response.json(note);
-  } else {
-    response.status(404).end();
-  }
+  });
 });
 
 app.put("/api/notes/:id", (request, response) => {
   const id = request.params.id;
   const obj = request.body;
   console.log(obj);
+
+  obj.content = "123";
+
   response.send(obj);
 });
 
@@ -54,13 +61,18 @@ app.delete("/api/notes/:id", (request, response) => {
   response.status(204).end();
 });
 
-const generateId = () => {
-  const maxId =
-    notes.length > 0 ? Math.max(...notes.map((n) => Number(n.id))) : 0;
-  return String(maxId + 1);
+const generateId = async () => {
+  try {
+    const notes = await Note.find({});
+    const maxId = notes.length; // Use the length to determine the new ID
+    return String(maxId + 1); // Return the next available ID as a string
+  } catch (error) {
+    console.log("Error generating ID:", error);
+    return "1"; // Return a default ID if there's an error
+  }
 };
 
-app.post("/api/notes", (request, response) => {
+app.post("/api/notes", async (request, response) => {
   const body = request.body;
 
   if (!body.content) {
@@ -69,18 +81,25 @@ app.post("/api/notes", (request, response) => {
     });
   }
 
-  const note = {
-    id: generateId(),
+  const id = await generateId();
+
+  const note = new Note({
+    id: id,
     content: body.content,
     important: body.important || false,
-  };
+  });
 
-  notes = notes.concat(note);
-
-  response.json(note);
+  note
+    .save()
+    .then((savedNote) => {
+      response.json(savedNote);
+    })
+    .catch((error) => {
+      console.error("Error saving note:", error);
+      response.status(500).json({ error: "Failed to save note" });
+    });
 });
 
-const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
